@@ -15,12 +15,28 @@ class SavedModelTests(unittest.TestCase):
     def test_predictions_nopos(self):
         df = pandas.read_csv(os.path.join(dirname, '1000guides.csv'), index_col=0)
         predictions = azimuth.model_comparison.predict(np.array(df['guide'].values), None, None)
-        self.assertTrue(np.allclose(predictions, df['truth nopos'].values, atol=1e-3))
+        if not np.allclose(predictions, df['truth nopos'].values, atol=1e-3):
+            failure_count = 0
+            for i, (pred, truth) in enumerate(zip(predictions, df['truth nopos'].values)):
+                if not np.isclose(pred, truth, atol=1e-3):
+                    failure_count += 1
+                    print(f"Row {i}: nopos prediction={pred}, truth nopos={truth}")
+            print(f"Total failure count: {failure_count} out of {len(df['truth nopos'])}")
+            self.fail("The predictions and truth nopos values are not close enough")
+
 
     def test_predictions_pos(self):
+        print('\n')
         df = pandas.read_csv(os.path.join(dirname, '1000guides.csv'), index_col=0)
         predictions = azimuth.model_comparison.predict(np.array(df['guide'].values), np.array(df['AA cut'].values), np.array(df['Percent peptide'].values))
-        self.assertTrue(np.allclose(predictions, df['truth pos'].values, atol=1e-3))
+        if not np.allclose(predictions, df['truth pos'].values, atol=1e-3):
+            failure_count = 0
+            for i, (pred, truth) in enumerate(zip(predictions, df['truth pos'].values)):
+                if not np.isclose(pred, truth, atol=1e-3):
+                    failure_count += 1
+                    print(f"Row {i}: pos prediction={pred}, truth pos={truth}")
+            print(f"Total failure count: {failure_count} out of {len(df['truth pos'])}")
+            self.fail("The predictions and truth pos values are not close enough")
 
 
         

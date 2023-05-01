@@ -9,9 +9,9 @@ import sklearn.metrics
 import Bio.SeqUtils.MeltingTemp as Tm
 import Bio.Entrez as Entrez
 import Bio.SeqUtils as SeqUtil
-import features.microhomology as microhomology
+from azimuth.features import microhomology as microhomology
 from Bio import SeqIO
-import metrics as ranking_metrics
+from azimuth import metrics as ranking_metrics
 import os
 import pickle
 import glob
@@ -21,10 +21,10 @@ import glob
 import Bio.Seq as Seq
 import time
 import scipy.stats as st
-import util
+from azimuth import util
 import sys
 import pandas as pd
-import corrstats
+from azimuth import corrstats
 
 def qqplot(pvals, fileout = None, alphalevel = 0.05,legend=None,xlim=None,ylim=None,fixaxes=True,addlambda=True,minpval=1e-20,title=None,h1=None,figsize=[5,5],grid=True, markersize=2):
     '''
@@ -92,9 +92,9 @@ def qqplot(pvals, fileout = None, alphalevel = 0.05,legend=None,xlim=None,ylim=N
         #pl.plot([0,qemp.max()], [0,qemp.max()],'r')        
         if addlambda:
             lambda_gc = estimate_lambda(pval)
-            print "lambda=%1.4f" % lambda_gc
+            print("lambda=%1.4f" % lambda_gc)
             #pl.legend(["gc="+ '%1.3f' % lambda_gc],loc=2)   
-            # if there's only one method, just print the lambda
+            # if there's only one method, just print(the lambda)
             if len(pvallist) == 1:
                 legendlist=["$\lambda_{GC}=$%1.4f" % lambda_gc]   
             # otherwise add it at the end of the name
@@ -291,7 +291,7 @@ def guide_positional_features(guide_seq, gene, strand):
         guide_seq = guide_seq.reverse_complement()
     ind = gene_seq.find(guide_seq)
     if ind ==-1:
-        print "returning None, could not find guide %s in gene %s" % (guide_seq, gene)
+        print("returning None, could not find guide %s in gene %s" % (guide_seq, gene))
         return ""
     assert gene_seq[ind:(ind+len(guide_seq))]==guide_seq, "match not right"
     ## now get what we want from this:
@@ -310,7 +310,7 @@ def convert_to_thirty_one(guide_seq, gene, strand):
         guide_seq = guide_seq.reverse_complement()
     ind = gene_seq.find(guide_seq)
     if ind ==-1:
-        print "returning sequence+'A', could not find guide %s in gene %s" % (guide_seq, gene)
+        print("returning sequence+'A', could not find guide %s in gene %s" % (guide_seq, gene))
         return gene_seq + 'A'
     assert gene_seq[ind:(ind+len(guide_seq))]==guide_seq, "match not right"
     #new_mer = gene_seq[ind:(ind+len(guide_seq))+1] #looks correct, but is wrong, due to strand frame-of-reference
@@ -328,10 +328,10 @@ def concatenate_feature_sets(feature_sets, keys=None):
     '''
     assert feature_sets != {}, "no feature sets present"
     if keys is None:
-        keys = feature_sets.keys()
+        keys = list(feature_sets.keys())
 
     F = feature_sets[keys[0]].shape[0]
-    for set in feature_sets.keys():
+    for set in keys:
         F2 = feature_sets[set].shape[0]
         assert F == F2, "not same # individuals for features %s and %s" % (keys[0], set)
 
@@ -349,10 +349,10 @@ def concatenate_feature_sets(feature_sets, keys=None):
 
     if False:
         inputs.shape
-        for j in keys: print j + str(feature_sets[j].shape)
+        for j in keys: print(j + str(feature_sets[j].shape))
         import ipdb; ipdb.set_trace()
 
-    #print "final size of inputs matrix is (%d, %d)" % inputs.shape
+    #print("final size of inputs matrix is (%d, %d)" % inputs.shape)
     return inputs, dim, dimsum, feature_names
 
 def extract_individual_level_data(one_result):
@@ -383,7 +383,7 @@ def spearmanr_nonan(x,y):
     r, p = st.spearmanr(x, y)
     if np.isnan(p):
         if len(np.unique(x))==1 or len(np.unique(y))==1:
-            print "WARNING: spearmanr is nan due to unique values, setting to 0"
+            print("WARNING: spearmanr is nan due to unique values, setting to 0")
             p = 0.0
             r = 0.0
         else:
@@ -435,7 +435,7 @@ def get_gene_sequence(gene_name):
     # records = Entrez.read(search)
 
     # if len(records['IdList']) > 1:
-    #     print "warning, multiple hits found for entrez gene search %s" % gene_name
+    #     print("warning, multiple hits found for entrez gene search %s" % gene_name)
 
     # elink = Entrez.read(Entrez.elink(dbfrom="gene", db='nucleotide', id=records['IdList'][0]))
     # nucl_id = elink[0]['LinkSetDb'][3]
@@ -446,7 +446,7 @@ def get_gene_sequence(gene_name):
     #         nucl_id = elink[0]['LinkSetDb'][0]['Link'][0]['Id']
     #         cut = True
     #     else:
-    #         print "sorry not enough information to return sequence"
+    #         print("sorry not enough information to return sequence"())
     #         return None
     # else:
     #     nucl_id = nucl_id['Link'][0]['Id']
@@ -466,7 +466,7 @@ def target_genes_stats(genes=['HPRT1', 'TADA1', 'NF2', 'TADA2B', 'NF1', 'CUL3', 
     for gene in genes:
         seq = get_gene_sequence(gene)
         if seq != None:
-            print '%s \t\t\t\t len: %d \t GCcont: %.3f \t Temp: %.4f \t molweight: %.4f' % (gene, len(seq), SeqUtil.GC(seq), Tm.Tm_staluc(seq, rna=False), SeqUtil.molecular_weight(seq, 'DNA'))
+            print('%s \t\t\t\t len: %d \t GCcont: %.3f \t Temp: %.4f \t molweight: %.4f' % (gene, len(seq), SeqUtil.GC(seq), Tm.Tm_NN(seq, rna=False), SeqUtil.molecular_weight(seq, 'DNA')))
 
 
 def ranktrafo(data):
@@ -569,7 +569,7 @@ def get_data(data, y_names, organism="human", target_gene=None):
     #strip out featurization to later
     features = pandas.DataFrame(data['30mer'])
 
-    if organism is "human":
+    if organism == "human":
         target_gene = y_names[0].split(' ')[1]
 
     outputs['Target gene'] = target_gene
@@ -627,7 +627,7 @@ def plot_metrics(metrics, truth_and_predictions, target_genes, run_label, color=
 
         fpr, tpr, _ = sklearn.metrics.roc_curve(all_truth, all_predictions)
         roc_auc = sklearn.metrics.auc(fpr, tpr)
-        #print run_label, roc_auc
+        #print(run_label, roc_auc)
         plt.figure('global ROC')
         plt.plot(fpr, tpr, label=run_label + " AUC=%.2f" % roc_auc, color=color, linewidth=2.)
         plt.legend(loc=0)
@@ -1004,7 +1004,7 @@ def plot_all_metrics(metrics, gene_names, all_learn_options, save, plots=None, b
                     plt.bar(ind+(i*width), metrics[method][metric], width, color=plt.cm.Paired(1.*i/len(metrics.keys())), label=method)
 
                 median_metric = np.median(metrics[method][metric])
-                print method, metric, median_metric
+                print(method, metric, median_metric)
                 assert not np.isnan(median_metric), "found nan for %s, %s" % (method, metric)
                 if metric not in boxplot_arrays.keys():
                     boxplot_arrays[metric] = np.array(metrics[method][metric])[:, None]
@@ -1061,7 +1061,7 @@ def load_results(directory, all_results, all_learn_options, model_filter=None, a
     if filelist ==[]:
         raise Exception("found no pickle files in %s" % directory)
     else:
-        print "found %d files in %s" % (len(filelist), directory)
+        print("found %d files in %s" % (len(filelist), directory))
 
     for results_file in filelist:
         if 'learn_options' in results_file:
@@ -1074,7 +1074,7 @@ def load_results(directory, all_results, all_learn_options, model_filter=None, a
                     if m in results_file:
                         in_filt = True
                 if not in_filt:
-                    print "%s not in model_filter" % (results_file)#, model_filter)
+                    print("%s not in model_filter" % (results_file))#, model_filter)
                     continue
             elif model_filter not in results_file:
                 continue
@@ -1094,7 +1094,7 @@ def load_results(directory, all_results, all_learn_options, model_filter=None, a
             else:
                 k_new = k
             assert k_new not in all_results.keys(), "found %s already" % k
-            print "adding key %s (from file %s)" % (k_new, os.path.split(results_file)[-1])
+            print("adding key %s (from file %s)" % (k_new, os.path.split(results_file)[-1]))
             all_results[k_new] = results[k]
             all_learn_options[k_new] = learn_options[k]
             num_added = num_added +1
@@ -1190,11 +1190,11 @@ def ensemble_cluster_results(directory=r'\\fusi1\crispr2\analysis\cluster\result
                 cv_predictions = np.append(cv_predictions, cv_predictions_gene_j[:,None],
                                                     axis=1)
 
-        if ensemble_type is 'majority':
+        if ensemble_type == 'majority':
             y_pred = ensembles.pairwise_majority_voting(test_predictions)
-        if ensemble_type is 'median':
+        if ensemble_type == 'median':
             y_pred = ensembles.median(test_predictions)
-        if ensemble_type is 'stacking':
+        if ensemble_type == 'stacking':
             y_pred = ensembles.linear_stacking(cv_truth, cv_predictions, test_predictions)
 
         ens_predictions[gene] = y_pred
@@ -1205,8 +1205,8 @@ def ensemble_cluster_results(directory=r'\\fusi1\crispr2\analysis\cluster\result
     # spearmans = []
     # for gene in ens_predictions.keys():
     #     spearmans.append(sp.stats.spearmanr(ens_predictions[gene], ens_truths[gene]['raw'])[0])
-    #     print gene, spearmans[-1]
-    # print "median: %.5f" % np.median(spearmans)
+    #     print(gene, spearmans[-1])
+    # print("median: %.5f" % np.median(spearmans))
 
     return all_results, all_learn_options
 
@@ -1245,13 +1245,13 @@ def plot_old_vs_new_feat(results, models, fontsize=20, filename=None, print_outp
         feat_AUC_se.append(np.std(metrics_feat['AUC']))
 
 
-    print "old features"
-    print "mean: " + str(base_spearman_means)
-    print "std: " + str(base_spearman_std)
+    print("old features")
+    print("mean: " + str(base_spearman_means))
+    print("std: " + str(base_spearman_std))
 
-    print "old + new features"
-    print "mean: " + str(feat_spearman_means)
-    print "std: " + str(feat_spearman_std)
+    print("old + new features")
+    print("mean: " + str(feat_spearman_means))
+    print("std: " + str(feat_spearman_std))
 
     plt.figure()
     ind = np.arange(len(models))
@@ -1322,7 +1322,7 @@ if __name__ == '__main__':
         X, Y = combine_organisms()
         X.to_pickle('../data/X.pd') #sequence features (i.e. inputs to prediction)
         Y.to_pickle('../data/Y.pd') #cell-averaged ranks, plus more (i.e. possible targets for prediction)
-        print "done writing to file"
+        print("done writing to file")
     elif V =="2":
         # this is now all in predict.py
         pass

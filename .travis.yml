@@ -1,11 +1,12 @@
 language: python
 python:
-  - "2.7"
-
+  - "3.10"
 
 before_install:
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
       wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+    elif [[ "$TRAVIS_PYTHON_VERSION" == "3.10" ]]; then
+      wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
     else
       wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
     fi
@@ -18,9 +19,10 @@ before_install:
   - conda info -a
 
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose sphinx pip nose cython pandas scikit-learn=0.17.1 biopython
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose sphinx pip nose cython pandas scikit-learn=1.2.2 biopython
   - pip install . 
 
 # command to run tests, e.g. python setup.py test
 script: 
   - nosetests azimuth/tests
+  

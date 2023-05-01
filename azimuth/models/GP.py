@@ -100,8 +100,8 @@ def gp_on_fold(feature_sets, train, test, y, y_all, inputs, dim, dimsum, learn_o
         plt.figure('kernel')
         plt.title('kernel')
         plt.imshow(m.kern.K(X,X))
-        print m
-        print "%.3f variance explained" % (m.Gaussian_noise.variance/y[train].var())
+        print(m)
+        print("%.3f variance explained" % (m.Gaussian_noise.variance/y[train].var()))
         import ipdb; ipdb.set_trace()
         plt.close('all')
     else:

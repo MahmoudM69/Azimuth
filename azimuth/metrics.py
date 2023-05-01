@@ -13,7 +13,7 @@ Learning to Rank for Information Retrieval (Tie-Yan Liu)
 import numpy as np
 import scipy as sp
 import scipy.stats
-import util as ut
+from azimuth import util as ut
 import time
 
 def mean_reciprocal_rank(rs):
@@ -530,9 +530,9 @@ if __name__ == "__main__":
     allp = np.nan*np.zeros((len(theta_range) + 1, T))
 
     if not simulated_data:
-        print "loading up saved data..." # two-fold CV data from CRISPR off-target GUIDE-SEQ
+        print("loading up saved data...") # two-fold CV data from CRISPR off-target GUIDE-SEQ
         with open(r'\\nerds5\kevin\from_nicolo\gs.pickle','rb') as f:  predictions, truth_all = pickle.load(f)
-        print "done."
+        print("done.")
         N = len(truth_all[0])
             
     for t in range(T):
@@ -571,9 +571,9 @@ if __name__ == "__main__":
             t1 = time.time()
 
         #for i, theta in enumerate(theta_range.tolist() + ["all"]):
-        #    print "%d, theta=%s) ndcg1=%f, ndcg2=%f, ndcg_diff=%f, p=%f, elapsed time=%f minutes, smallest_p=%f" % (t, str(theta), ndcg1[theta], ndcg2[theta], real_ndcg_diff[theta], pval[theta], (t1-t0)/60, 1.0/nperm)        
+        #    print("%d, theta=%s) ndcg1=%f, ndcg2=%f, ndcg_diff=%f, p=%f, elapsed time=%f minutes, smallest_p=%f" % (t, str(theta), ndcg1[theta], ndcg2[theta], real_ndcg_diff[theta], pval[theta], (t1-t0)/60, 1.0/nperm)        )
         #    allp[i, t] = pval[theta]
-        #print "---------------"
+        #print("---------------")
         
     #for i, theta in enumerate(theta_range.tolist() + ["all"]):
     for i, theta in enumerate(theta_range.tolist()):
@@ -606,10 +606,10 @@ if __name__ == "__main__":
     #     # using our function
     #     dcg3 = dcg_at_k_ties(labels,predictions,k)
 
-    #     print "%f, %f, %f" % (dcg1, dcg2, dcg3)
+    #     print("%f, %f, %f" % (dcg1, dcg2, dcg3))
     #     assert(np.abs(dcg1 - dcg2) < 1e-8)
     #     assert(np.abs(dcg2 - dcg3) < 1e-8)
-    # print "check out ok for case with all ties in predictions"
+    # print("check out ok for case with all ties in predictions")
 
     truth = np.array([3, 4, 2, 1, 0, 0, 0])
     pred1 = np.array([3, 4, 2, 1, 0, 0, 0])
@@ -626,29 +626,29 @@ if __name__ == "__main__":
     k = len(pred3)
 
     pval, real_ndcg_diff,  perm_ndcg_diff, ndcg1, ndcg2 = ndcg_at_k_swap_perm_test(pred1, pred2, truth, nperm, method, k, normalize_from_below_too, theta=theta)
-    print "ndcg1=%f, ndcg2=%f, ndcg_diff=%f, p=%f" % (ndcg1, ndcg2, real_ndcg_diff, pval)
+    print("ndcg1=%f, ndcg2=%f, ndcg_diff=%f, p=%f" % (ndcg1, ndcg2, real_ndcg_diff, pval))
     
     pval, real_ndcg_diff,  perm_ndcg_diff, ndcg1, ndcg2 = ndcg_at_k_swap_perm_test(pred1, pred1, truth, nperm, method, k, normalize_from_below_too, theta=theta)    
-    print "ndcg1=%f, ndcg2=%f, ndcg_diff=%f, p=%f" % (ndcg1, ndcg2, real_ndcg_diff, pval)
+    print("ndcg1=%f, ndcg2=%f, ndcg_diff=%f, p=%f" % (ndcg1, ndcg2, real_ndcg_diff, pval))
 
     pval, real_ndcg_diff,  perm_ndcg_diff, ndcg1, ndcg2 = ndcg_at_k_swap_perm_test(pred1, pred4, truth, nperm, method, k, normalize_from_below_too, theta=theta)    
-    print "ndcg1=%f, ndcg2=%f, ndcg_diff=%f, p=%f" % (ndcg1, ndcg2, real_ndcg_diff, pval)
+    print("ndcg1=%f, ndcg2=%f, ndcg_diff=%f, p=%f" % (ndcg1, ndcg2, real_ndcg_diff, pval))
 
     pval, real_ndcg_diff,  perm_ndcg_diff, ndcg1, ndcg2 = ndcg_at_k_swap_perm_test(pred1, pred5, truth, nperm, method, k, normalize_from_below_too, theta=theta)    
-    print "ndcg1=%f, ndcg2=%f, ndcg_diff=%f, p=%f" % (ndcg1, ndcg2, real_ndcg_diff, pval)
+    print("ndcg1=%f, ndcg2=%f, ndcg_diff=%f, p=%f" % (ndcg1, ndcg2, real_ndcg_diff, pval))
 
     import ipdb; ipdb.set_trace()
 
 
-    #print ndcg_at_k_ties(truth, truth, k, method=0, normalize_from_below_too=True)
-    #print ndcg_at_k_ties(truth, pred2, k, method=0, normalize_from_below_too=True)
-    #print ndcg_at_k_ties(truth, pred3, k, method=0, normalize_from_below_too=True)
-    #print ndcg_at_k_ties(truth3, pred3, k, method=3, normalize_from_below_too=True)
-    print ndcg_at_k_ties(truth4, pred2, k, method=3, normalize_from_below_too=True)
+    #print(ndcg_at_k_ties(truth, truth, k, method=0, normalize_from_below_too=True))
+    #print(ndcg_at_k_ties(truth, pred2, k, method=0, normalize_from_below_too=True))
+    #print(ndcg_at_k_ties(truth, pred3, k, method=0, normalize_from_below_too=True))
+    #print(ndcg_at_k_ties(truth3, pred3, k, method=3, normalize_from_below_too=True))
+    print(ndcg_at_k_ties(truth4, pred2, k, method=3, normalize_from_below_too=True))
         
-    print ndcg_alt(truth[np.argsort(pred2)[::-1]], 5)
-    print ndcg_at_k(truth[np.argsort(pred2)[::-1]], 5, method=1)
-    print ndcg_at_k(truth[np.argsort(pred2)[::-1]], 5, method=0)
+    print(ndcg_alt(truth[np.argsort(pred2)[::-1]], 5))
+    print(ndcg_at_k(truth[np.argsort(pred2)[::-1]], 5, method=1))
+    print(ndcg_at_k(truth[np.argsort(pred2)[::-1]], 5, method=0))
 
-    print ndcg_at_k_ties(truth, pred2, 5, method=1)
-    print ndcg_at_k_ties(truth, pred2, 5, method=0)
+    print(ndcg_at_k_ties(truth, pred2, 5, method=1))
+    print(ndcg_at_k_ties(truth, pred2, 5, method=0))

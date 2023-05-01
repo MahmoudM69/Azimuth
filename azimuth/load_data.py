@@ -1,5 +1,5 @@
 import pandas
-import util
+from azimuth import util
 import matplotlib.pyplot as plt
 import scipy as sp
 import scipy.stats
@@ -10,7 +10,7 @@ cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 def from_custom_file(data_file, learn_options):
     # use semantics of when we load V2 data
-    print "Loading inputs to predict from %s" % data_file
+    print("Loading inputs to predict from %s" % data_file)
     data = pandas.read_csv(data_file)
 
     mandatory_columns = ['30mer', 'Target gene', 'Percent Peptide', 'Amino Acid Cut position']
@@ -37,7 +37,7 @@ def from_custom_file(data_file, learn_options):
 def from_file(data_file, learn_options, data_file2=None, data_file3=None):
     if learn_options["V"] == 1:  # from Nature Biotech paper
 
-        print "loading V%d data" % learn_options["V"]
+        print("loading V%d data" % learn_options["V"])
 
         assert not learn_options["weighted"] is not None, "not supported for V1 data"
         annotations, gene_position, target_genes, Xdf, Y = read_V1_data(data_file, learn_options)
@@ -129,8 +129,8 @@ def combine_organisms(human_data, mouse_data):
 def read_V1_data(data_file, learn_options, AML_file=cur_dir + "/data/V1_suppl_data.txt"):
     if data_file is None:
         data_file = cur_dir + "/data/V1_data.xlsx"
-    human_data = pandas.read_excel(data_file, sheetname=0, index_col=[0, 1])
-    mouse_data = pandas.read_excel(data_file, sheetname=1, index_col=[0, 1])
+    human_data = pandas.read_excel(data_file, sheet_name=0, index_col=[0, 1])
+    mouse_data = pandas.read_excel(data_file, sheet_name=1, index_col=[0, 1])
     Xdf, Y = combine_organisms(human_data, mouse_data)
 
     # get position within each gene, then join and re-order
@@ -152,12 +152,12 @@ def read_V1_data(data_file, learn_options, AML_file=cur_dir + "/data/V1_suppl_da
     assert Xdf.index.equals(Y.index), "The index of Xdf is different from the index of Y (this can cause inconsistencies/random performance later on)"
 
     if learn_options is not None and learn_options["flipV1target"]:
-        print "************************************************************************"
-        print "*****************MATCHING DOENCH CODE (DEBUG MODE)**********************"
-        print "************************************************************************"
+        print("************************************************************************")
+        print("*****************MATCHING DOENCH CODE (DEBUG MODE)**********************")
+        print("************************************************************************")
         # normally it is: Y['average threshold'] = Y['average rank'] > 0.8, where 1s are good guides, 0s are not
         Y['average threshold'] = Y['average rank'] < 0.2  # 1s are bad guides
-        print "press c to continue"
+        print("press c to continue")
         import ipdb
         ipdb.set_trace()
 
@@ -174,8 +174,8 @@ def read_xu_et_al(data_file, learn_options=None, verbose=True, subsetting='ours'
     aggregated = None
 
     for d in datasets:
-        data_efficient = pandas.read_excel(data_file, sheetname='%s_efficient_sgRNA' % d, skiprows=2)
-        data_inefficient = pandas.read_excel(data_file, sheetname='%s_inefficient_sgRNA' % d, skiprows=2)
+        data_efficient = pandas.read_excel(data_file, sheet_name='%s_efficient_sgRNA' % d, skiprows=2)
+        data_inefficient = pandas.read_excel(data_file, sheet_name='%s_inefficient_sgRNA' % d, skiprows=2)
 
         data_efficient['threshold'] = 1.
         data_inefficient['threshold'] = 0.
@@ -231,7 +231,7 @@ def read_V2_data(data_file, learn_options=None, verbose=True):
     # import predict as pr; a1, g1, t1, X1, Y1 = pr.data_setup()
     # a1.index.names
 
-    data = pandas.read_excel(data_file, sheetname="ResultsFiltered", skiprows=range(0, 6+1), index_col=[0, 4])
+    data = pandas.read_excel(data_file, sheet_name="ResultsFiltered", skiprows=range(0, 6+1), index_col=[0, 4])
     # grab data relevant to each of three drugs, which exludes some genes
     # note gene MED12 has two drugs, all others have at most one
     Xdf = pandas.DataFrame()
@@ -272,7 +272,7 @@ def read_V2_data(data_file, learn_options=None, verbose=True):
             count = count + Xtmp.shape[0]
             Xdf = pandas.concat([Xdf, Xtmp], axis=0)
             if verbose:
-                print "Loaded %d samples for gene %s \ttotal number of samples: %d" % (Xtmp.shape[0], g, count)
+                print("Loaded %d samples for gene %s \ttotal number of samples: %d" % (Xtmp.shape[0], g, count))
 
     # create new index that includes the drug
     Xdf = Xdf.set_index('drug', append=True)
@@ -335,9 +335,9 @@ def read_V2_data(data_file, learn_options=None, verbose=True):
     gene_position = util.impute_gene_position(gene_position)
 
     if learn_options is not None and learn_options["weighted"] == "variance":
-        print "computing weights from replicate variance..."
+        print("computing weights from replicate variance...")
         # compute the variance across replicates so can use it as a weight
-        data = pandas.read_excel(data_file, sheetname="Normalized", skiprows=range(0, 6+1), index_col=[0, 4])
+        data = pandas.read_excel(data_file, sheet_name="Normalized", skiprows=range(0, 6+1), index_col=[0, 4])
         data.index.names = ["Sequence", "Target gene"]
 
         experiments = {}
@@ -359,7 +359,7 @@ def read_V2_data(data_file, learn_options=None, verbose=True):
         orig_index = Y.index.copy()
         Y = pandas.merge(Y, pandas.DataFrame(variance), how="inner", left_index=True, right_index=True)
         Y = Y.ix[orig_index]
-        print "done."
+        print("done.")
 
     # Make sure to keep this check last in this function
     assert Xdf.index.equals(Y.index), "The index of Xdf is different from the index of Y (this can cause inconsistencies/random performance later on)"
